@@ -1,30 +1,38 @@
-import { useContext } from 'react'
+import { React, useContext, useEffect, useCallback } from 'react'
+import { SocketContext } from "../context/socket";
 import Painterro from "painterro"
 
-export default function Paint(props) {
-    console.log(props);
-    const socket = props.socket;
+const Paint = (props) => {
+    console.log(SocketContext);
+    const socket = useContext(SocketContext);
+    
     
     let saveHandler = (image, done) => {
-        if (socket) {
-            socket.emit("sendPicture", image.asBlob());
-        }
-        
+        socket.emit("sendPicture", image.asBlob());
     }
-    
+
     const p = Painterro({
         defaultTool: "brush",
         hiddenTools: ["crop", "resize", "save", "open", "zoomin", "zoomout", "select", "settings", "pixelize", "close"],
         saveHandler: saveHandler
     }).show();
+
+    const handleGetPicture = useCallback(() => {
+        console.log("Server wants picture");
+        p.save();
+    }, [p]);
+
+    useEffect(() => {
+        socket.on("getPicture", handleGetPicture);
+        return () => {socket.off("getPicture");}
+    }, [socket, handleGetPicture]);
+
     
-    if (socket) {
-        socket.on("getPicture", () => {
-            console.log("Server wants picture");
-            p.save();
-        });
-    }
     
+    
+
     return <div>
     </div>
 }
+
+export default Paint

@@ -3,37 +3,22 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import {
     Paint
 } from "./components"
-import {io} from "socket.io-client"
+import { SocketContext, socket} from "./context/socket";
+
 
 const App = () => {
-
-    const [socket, setSocket] = useState();
-
-    useEffect(() => {
-        const newIO = io("http://localhost:3000");
-        setSocket(newIO);
-        return () => newIO.close(); 
-    }, [setSocket]);
-
-    
-    if (socket) {
-        return (
-            <BrowserRouter>
+    console.log(socket);
+    console.log(SocketContext);
+    return (
+        
+        <BrowserRouter>
+            <SocketContext.Provider value={socket}>
                 <Switch>
-                    <Route path="/" render={() => <Paint socket={socket} />} />
+                    <Route path="/" exact component={Paint} />
                 </Switch>
-            </BrowserRouter>
-        );
-    }
-    else {
-        return (
-            <BrowserRouter>
-                <Switch>
-                    <Route path="/" render={Paint} />
-                </Switch>
-            </BrowserRouter>
-        );
-    }
+                </SocketContext.Provider>
+        </BrowserRouter>
+    );
 }
 
 export default App
